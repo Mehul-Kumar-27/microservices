@@ -19,7 +19,9 @@ func main() {
 	sm := http.NewServeMux()
 
 	hellowHandeller := handellers.NewHellowHandller(logger)
+	getProductHandeller := handellers.NewProudcts(logger)
 	sm.Handle("/hellow", hellowHandeller)
+	sm.Handle("/getProducts", getProductHandeller)
 
 	server := &http.Server{
 		Addr:         ":7000",
