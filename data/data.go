@@ -2,48 +2,61 @@ package data
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+
+	"io"
 	"net/http"
 )
 
+type ProductList struct {
+	Products []Product `json:"products"`
+	Total    int       `json:"total"`
+	Skip     int       `json:"skip"`
+	Limit    int       `json:"limit"`
+}
+
 type Product struct {
-	ID                 int
-	Title              string
-	Description        string
-	Price              float64
-	DiscountPercentage float64
-	Rating             float64
-	Stock              int
-	Brand              string
-	Category           string
-	Thumbnail          string
-	Images             []string
+	ID                 int      `json:"id"`
+	Title              string   `json:"title"`
+	Description        string   `json:"description"`
+	Price              float64  `json:"price"`
+	DiscountPercentage float64  `json:"discountPercentage"`
+	Rating             float64  `json:"rating"`
+	Stock              int      `json:"stock"`
+	Brand              string   `json:"brand"`
+	Category           string   `json:"category"`
+	Thumbnail          string   `json:"thumbnail"`
+	Images             []string `json:"images"`
 }
 
 func GetProducts() ([]Product, error) {
 	url := "https://dummyjson.com/products"
 
 	response, err := http.Get(url)
-
 	if err != nil {
 		return nil, err
-
 	}
+
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprint("Unable to fetch produts. Status code %d", response.StatusCode))
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println("Error occurred at 1")
+		return nil, err
 	}
 
 	var products []Product
+	var productsList ProductList
 
-	fmt.Println(response.Body)
+	parsingError := json.Unmarshal(body, &productsList)
 
-	json.NewDecoder(response.Body).Decode(&products)
+	if parsingError != nil {
+		fmt.Println("Error occurred at 12")
+		fmt.Println(parsingError)
+		return nil, err
+	}
 
-	fmt.Println(products)
+	products = productsList.Products
 
 	return products, nil
-
 }

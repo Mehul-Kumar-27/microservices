@@ -2,7 +2,7 @@ package handellers
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 )
@@ -18,11 +18,12 @@ func NewHellowHandller(l *log.Logger) *Hello {
 func (h *Hello) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	h.l.Println("Inside Hellow Handeller")
 
-	d, err := ioutil.ReadAll(r.Body)
+	d, err := io.ReadAll(r.Body)
 
 	if err != nil {
 		http.Error(rw, "Something Went Wrong", http.StatusBadRequest)
+		return
 	}
 
-	fmt.Fprintf(rw, "The value in the body is %v", d)
+	fmt.Fprintf(rw, "Hello %s", d)
 }

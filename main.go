@@ -13,7 +13,7 @@ import (
 
 func main() {
 
-	logger := log.New(os.Stdout, "Api", log.LstdFlags)
+	logger := log.New(os.Stdout, "Api ", log.LstdFlags)
 
 	logger.Println("Hellow")
 	sm := http.NewServeMux()
@@ -27,8 +27,8 @@ func main() {
 		Addr:         ":7000",
 		Handler:      sm,
 		IdleTimeout:  120 * time.Second,
-		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
+		ReadTimeout:  20 * time.Second,
+		WriteTimeout: 20 * time.Second,
 	}
 
 	go func() {
