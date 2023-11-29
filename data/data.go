@@ -1,9 +1,9 @@
 package data
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-
 	"io"
 	"net/http"
 )
@@ -59,4 +59,44 @@ func GetProducts() ([]Product, error) {
 	products = productsList.Products
 
 	return products, nil
+}
+
+func AddProducts(r io.Reader) (Product, error) {
+	url := "https://dummyjson.com/products/add"
+	e := json.NewDecoder(r)
+	
+	newProduct := &Product{}
+	errorProduct := &Product{}
+	/// Converting the reader body to the product object
+	err := e.Decode(newProduct)
+	if err != nil {
+		return *errorProduct, err
+	}
+
+	/// Coverting the object to the json
+	payload, err := json.Marshal(newProduct)
+	if err != nil {
+		fmt.Println("Harr gaye yrr !!!")
+		return *errorProduct, err
+	}
+
+	response, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
+	if err != nil {
+		fmt.Println("Harr gaye yrr !!")
+		return *errorProduct, fmt.Errorf("HTTP request failed with status: %d", response.StatusCode)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		fmt.Println("Harr gaye yrr !")
+		return *errorProduct, fmt.Errorf("HTTP request failed with status: %d", response.StatusCode)
+	}
+
+	err = json.NewDecoder(response.Body).Decode(newProduct)
+	if err != nil {
+		fmt.Println("Harr gaye yrr")
+		return *errorProduct, err
+	}
+
+	return *newProduct, nil
 }

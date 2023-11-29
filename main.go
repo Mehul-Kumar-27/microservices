@@ -33,8 +33,8 @@ func main() {
 
 	go func() {
 		server.ListenAndServe()
-
 	}()
+	
 	sigCham := make(chan os.Signal)
 
 	signal.Notify(sigCham, os.Interrupt)
