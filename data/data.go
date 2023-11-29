@@ -64,7 +64,7 @@ func GetProducts() ([]Product, error) {
 func AddProducts(r io.Reader) (Product, error) {
 	url := "https://dummyjson.com/products/add"
 	e := json.NewDecoder(r)
-	
+
 	newProduct := &Product{}
 	errorProduct := &Product{}
 	/// Converting the reader body to the product object
@@ -99,4 +99,35 @@ func AddProducts(r io.Reader) (Product, error) {
 	}
 
 	return *newProduct, nil
+}
+
+func UpdateProduct(r io.Reader, id string) (Product, error) {
+	// Prepare the URL
+	url := fmt.Sprintf("https://dummyjson.com/products/%s", id)
+
+	// Create a new request
+	req, err := http.NewRequest("PUT", url, r)
+	if err != nil {
+		return Product{}, err
+	}
+
+	// Set the content type header
+	req.Header.Set("Content-Type", "application/json")
+
+	// Make the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return Product{}, err
+	}
+	defer resp.Body.Close()
+
+	// Decode the response
+	var updatedProduct Product
+	err = json.NewDecoder(resp.Body).Decode(&updatedProduct)
+	if err != nil {
+		return Product{}, err
+	}
+
+	return updatedProduct, nil
 }

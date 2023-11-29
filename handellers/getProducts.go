@@ -6,6 +6,7 @@ import (
 	"log"
 	"microservice/data"
 	"net/http"
+	"regexp"
 )
 
 type Products struct {
@@ -29,8 +30,16 @@ func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Method == http.MethodPut {
+		p.l.Println("In the put section")
+		p.updateAProduct(rw, r)
+		return
+	}
+
 	// if r.Method == http.MethodPut {
 	// }
+
+	rw.WriteHeader(404)
 
 }
 
@@ -76,3 +85,34 @@ func (p *Products) addNewProduct(rw http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func (p *Products) updateAProduct(rw http.ResponseWriter, r *http.Request) {
+	regex := regexp.MustCompile(`(\d+)`)
+	p.l.Printf(r.URL.Path)
+
+	subStrings := regex.FindAll([]byte(r.URL.Path), -1)
+
+	for i, matches := range subStrings {
+		p.l.Printf("The component at %v is %v", i, string(matches))
+	}
+
+	// Assuming data.UpdateProduct takes a reader and a string ID
+	response, err := data.UpdateProduct(r.Body, string(subStrings[0]))
+
+	if err != nil {
+		p.l.Printf("Error updating product: %v", err)
+		http.Error(rw, "Error Occurred", http.StatusInternalServerError)
+		return
+	}
+
+	p.l.Printf("Update successful. Response: %v", response)
+
+	rw.Header().Set("Content-Type", "application/json")
+	e := json.NewEncoder(rw)
+
+	if err := e.Encode(response); err != nil {
+		p.l.Printf("Error encoding response: %v", err)
+		http.Error(rw, "Unable to convert the products to JSON data", http.StatusInternalServerError)
+	}
+}
+

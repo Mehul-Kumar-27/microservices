@@ -22,6 +22,8 @@ func main() {
 	getProductHandeller := handellers.NewProudcts(logger)
 	sm.Handle("/hellow", hellowHandeller)
 	sm.Handle("/getProducts", getProductHandeller)
+	sm.Handle("/getProducts/", getProductHandeller)
+	
 
 	server := &http.Server{
 		Addr:         ":7000",
