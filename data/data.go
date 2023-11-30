@@ -131,3 +131,37 @@ func UpdateProduct(r io.Reader, id string) (Product, error) {
 
 	return updatedProduct, nil
 }
+
+func DeleteProduct(r io.Reader, id string) (Product, error) {
+	// Prepare the URL
+	url := fmt.Sprintf("https://dummyjson.com/products/%s", id)
+
+	// Create a new request
+	req, err := http.NewRequest("DELETE", url, r)
+	if err != nil {
+		return Product{}, err
+	}
+
+	// Set the content type header
+	req.Header.Set("Content-Type", "application/json")
+
+	// Make the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return Product{}, err
+	}
+	defer resp.Body.Close()
+
+	// Decode the response
+	var deletedProduct Product
+	err = json.NewDecoder(resp.Body).Decode(&deletedProduct)
+	if err != nil {
+		return Product{}, err
+	}
+
+	return deletedProduct, nil
+}
+
+
+
